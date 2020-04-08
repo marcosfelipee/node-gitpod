@@ -1,46 +1,83 @@
 const User = require('../app/models/user');
+const repository = require("../repositories/user-repository");
 
-exports.post = function (req, res){
-    var user = new User();
-    user.name = req.body.name;
-    user.email = req.body.email;
-    user.password = req.body.password;
-
-    user.save(function(error){
-        if (error)
-            res.send("Erro ao tentar inserir um usuário" + error);
-
-        res.status(201).json({ message: 'Usuário inserido com sucesso' });
-    });
+exports.getAll = async (req, res) => {
+    try {
+        var data = await repository.get();
+        res.status(200).send(data);
+    } catch (error) {
+        res.status(500).send({
+            message: "Falha na requisição",
+            erro: error
+        })
+    }
 };
 
-exports.get = function(req, res){
-    User.find(function(err, usrs){
-        if (err)
-            res.send(err);
-        res.status(200).json({
-            message: 'Usuários retornados',
-            users: usrs
+exports.getById = async (req, res) => {
+    try {
+        const id = req.params.userId;
+        var data = await repository.getById(id);
+        res.status(200).send(data);
+    } catch (error){
+        res.status(500).send({
+            message: "Falha na requisição",
+            erro: error
         });
-    });
+    }
+    
+}
+
+exports.post = async (req, res) => {
+
+    try {
+        await repository.post({
+            name: req.body.name,
+            email: req.body.email,
+            password: req.body.password
+        });
+        res.status(201).send({
+            message: "Usuário inserido com sucesso"
+        })
+    } catch (error) {
+        res.status(500).send({
+            message: "Falha ao inserir um usuário",
+            erro: error
+        });
+
+    }
+
 };
 
-exports.getById = function(req, res){
-    const id = req.params.userId;
-    User.findById(id, function(err, user){
-        if (err) {
-            res.status(500).json({
-                message: "Erro ao encontrar"
-            });
-        } else if (user == null) {
-            res.status(400).json({
-                message: "Usuário não encontrado"
-            });
-        } else {
-            res.status(200).json({
-                message: "Usuário encontrado",
-                user: user
-            });
-        }
-    })
+exports.put = async (req, res) => {
+    try {
+        const id = req.params.userId;    
+        const data = await repository.put(id, req.body);
+        res.status(200).send({
+            message:"Usuário atualizado com sucesso",
+            dados: data
+        })
+    } catch (error) {
+         res.status(500).send({
+            message: "Falha na requisição",
+            erro: error
+        });
+    }
 }
+
+
+
+exports.delete = async (req, res) =>{
+    try {
+        const id = req.params.userId;  
+        await repository.delete(id);
+        res.status(200).send({
+            message:"Usuário removido com sucesso",
+        })
+    } catch (error) {
+         res.status(500).send({
+            message: "Falha na requisição",
+            erro: error
+        });
+    }
+    
+};
