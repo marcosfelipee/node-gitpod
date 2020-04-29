@@ -1,6 +1,6 @@
 const express = require('express')
 var router = express.Router(); //interceptação das rotas
-const userController = require('../controllers/user-controllers');
+const userController = require('../controllers/user-controller');
 
 //POST
 router.post("/", userController.post);
